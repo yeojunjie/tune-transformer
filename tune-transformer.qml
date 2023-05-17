@@ -33,6 +33,17 @@ MuseScore {
         
         // For each segment in the score, ...
         while (segment !== null) {
+
+            // Check if this segment contains a chord symbol.
+            var annotations = segment.annotations;
+            for (var annotationIndex in annotations) {
+                var annotation = annotations[annotationIndex];
+                if (annotation.name === "Harmony") {
+                    mostRecentChordSymbol = annotation;
+                }
+            }
+
+            // Process each note across all chords, voices, and staves.
             for (var staff = 0; staff < numStaves; staff++) {
                 for (var voice = 0; voice < numVoices; voice++) {
 
@@ -49,7 +60,7 @@ MuseScore {
                     var notesInChord = currentElement.notes;
                     var numNotesInChord = notesInChord.length;
                     for (var i = 0; i < numNotesInChord; i++) {
-                        console.log(notesInChord[i].pitch);
+                        console.log("TODO: Adjust " + notesInChord[i].pitch + " to fit the chord " + mostRecentChordSymbol.text + ".");
                     }
                 }
             }

@@ -28,26 +28,17 @@ MuseScore {
 
         var mostRecentChordSymbol = null;
 
-        // Use a cursor to get the first segment.
-        // Segments are used because cursors seem to be buggy. 
-        // See Dev Notes in README.md.
-        var cursor = curScore.newCursor();
-        cursor.rewindToTick(0);
-        var segment = cursor.segment;
+        // We use a segment to iterate through the score.
+        var segment = curScore.firstSegment();
         
         // For each segment in the score, ...
-        do {
-            console.log("Current tick: " + segment.tick);
-
+        while (segment !== null) {
             for (var staff = 0; staff < numStaves; staff++) {
-                console.log("Current staff: " + staff);
-
                 for (var voice = 0; voice < numVoices; voice++) {
-                    console.log("Current voice: " + voice);
 
                     // Get the current element at the current staff and voice.
                     const trackNumber = (staff * numVoices) + voice;
-                    var currentElement = segment.elementAt(trackNumber);
+                    const currentElement = segment.elementAt(trackNumber);
 
                     // If there is no element at this cursor position or if the element is not a chord, continue.
                     if (!currentElement || currentElement.type !== Element.CHORD) {
@@ -66,7 +57,7 @@ MuseScore {
             // Advance to the next segment.
             segment = segment.next;
 
-        } while (segment !== null); // (while there is still another segment in the score)
+        }
 
         // Terminate the plugin.
         Qt.quit();

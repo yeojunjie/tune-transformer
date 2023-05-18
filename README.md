@@ -1,8 +1,13 @@
 # tune-transformer
 TuneTransformer is a MuseScore 3.x plugin that shifts the notes of a melody to fit given chords.
 
----
-## Developer Notes
+## Credits
+
+This plugin relies heavily on the [ExpandChordSymbols](https://github.com/markshepherd/ExpandChordSymbols) plugin's calculation of which notes belong in a given chord.
+
+# Developer Notes
+
+## Cursors vs. Segments
 Instead of cursors, segments are used as the main way to navigate throughout the score. This is because, for some reason, in the code below which uses cursors, `Line A` causes all but the first segment to be skipped.
 
 ```
@@ -23,3 +28,9 @@ do {
 
 } while (cursor.next()); // (returns false at the last segment)
 ```
+
+## One `.js` File
+
+I had to put all the code in one `.js` file because it seems that MuseScore allows imports in `.qml` files but not in `.js` files.
+
+Otherwise, I would have separated my code from the code I took from the ExpandChordSymbols plugin.

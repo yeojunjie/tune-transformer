@@ -12,6 +12,7 @@
 
 import QtQuick 2.2
 import MuseScore 3.0
+import "TuneTransformer.js" as TuneTransformer
 
 MuseScore {
     version: "3.4.2.1"
@@ -26,7 +27,7 @@ MuseScore {
         // We assume that each staff has four voices even if they are not all used.
         const numVoices = 4;
 
-        var mostRecentChordSymbol = null;
+        var mostRecentChordSymbol = null; // A String.
 
         // We use a segment to iterate through the score.
         var segment = curScore.firstSegment();
@@ -39,7 +40,7 @@ MuseScore {
             for (var annotationIndex in annotations) {
                 var annotation = annotations[annotationIndex];
                 if (annotation.name === "Harmony") {
-                    mostRecentChordSymbol = annotation;
+                    mostRecentChordSymbol = annotation.text;
                 }
             }
 
@@ -60,7 +61,7 @@ MuseScore {
                     var notesInChord = currentElement.notes;
                     var numNotesInChord = notesInChord.length;
                     for (var i = 0; i < numNotesInChord; i++) {
-                        console.log("TODO: Adjust " + notesInChord[i].pitch + " to fit the chord " + mostRecentChordSymbol.text + ".");
+                        TuneTransformer.snapNoteToNearestChordTone(notesInChord[i], mostRecentChordSymbol);
                     }
                 }
             }

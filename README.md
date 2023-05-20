@@ -4,7 +4,7 @@ TuneTransformer is a MuseScore 3.x plugin that shifts the notes of a melody to f
 ## Installation and Usage
 General instructions for installing and using plugins can be found [here](https://musescore.org/en/handbook/3/plugins).
 
-Place `tune-transformer.qml` and `tune-transformer.js` in the folder for plugins.
+Place `tune-transformer.qml` and `TuneTransformer.js` in the folder for plugins.
 
 The plugin will only work on scores with a chord symbol at the beginning of the score.
 

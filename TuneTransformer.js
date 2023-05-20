@@ -766,8 +766,19 @@ function pitchToTpc(pitch) {
     return [14, 21, 16, 11, 18, 13, 20, 15, 10, 17, 12, 19][pitch % 12];
 }
 
+/**
+ * Snaps a note to the nearest chord tone of a given chord.
+ * Does nothing if chord is null.
+ * @param {*} note a MuseScore note object.
+ * @param {*} chord a string, e.g. "CM7" describing the chord.
+ */
 function snapNoteToNearestChordTone(note, chord) {
 
+    // Do nothing if chord is null.
+    if (chord === null) {
+        return;
+    }
+    
     // Determine the chord tones of the chord.
     // For example, for a C major chord, chordTones would be [60, 64, 67].
     var chordTones = chordTextToMidiNotes(chord, true);

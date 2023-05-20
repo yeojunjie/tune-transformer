@@ -68,7 +68,15 @@ MuseScore {
                     var notesInChord = currentElement.notes;
                     var numNotesInChord = notesInChord.length;
                     for (var i = 0; i < numNotesInChord; i++) {
-                        TuneTransformer.snapNoteToNearestChordTone(notesInChord[i], mostRecentChordSymbol);
+                        
+                        // Determine what scale best suits the current chord symbol.
+                        // `scaleTones` is an array of integers. Each integer is a MIDI pitch number.
+                        var scaleTones = TuneTransformer.getScaleForChord(mostRecentChordSymbol);
+
+                        // Snap the current note to the nearest scale tone.
+                        TuneTransformer.snapNoteToNearestScaleTone(notesInChord[i], scaleTones);
+
+                        // TuneTransformer.snapNoteToNearestChordTone(notesInChord[i], mostRecentChordSymbol);
                     }
                 }
             }

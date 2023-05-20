@@ -40,7 +40,14 @@ MuseScore {
             for (var annotationIndex in annotations) {
                 var annotation = annotations[annotationIndex];
                 if (annotation.name === "Harmony") {
-                    mostRecentChordSymbol = annotation.text;
+                    if (annotation.text === "N.C.") {
+                        // Handle the case where the chord symbol is "N.C.", which means "no chord".
+                        mostRecentChordSymbol = null;
+                        continue;
+                    } else {
+                        // Update the most recent chord symbol.
+                        mostRecentChordSymbol = annotation.text;
+                    }
                 }
             }
 

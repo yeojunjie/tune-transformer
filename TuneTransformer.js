@@ -357,7 +357,7 @@ function parseChordSymbol(symbol) {
     }        
 
     // Uncomment the following line to see what the chord specification looks like.
-    console.log(symbol, JSON.stringify(result));
+    // console.log(symbol, JSON.stringify(result));
 
     return result;
 }
@@ -444,7 +444,7 @@ function expandChordSpec(chordSpec) {
         result[parseInt(a.number)] = a.sharp ? 1 : -1;
     }
 
-    console.log("chordMap", JSON.stringify(result));
+    // console.log("chordMap", JSON.stringify(result));
     return result;
 }
 
@@ -826,6 +826,11 @@ function snapNoteToNearestChordTone(note, chord) {
  */
 function getScaleForChord(chord) {
 
+    // Return an empty array if chord is null.
+    if (chord === null) {
+        return [];
+    }
+
     // The major scale is played over major chords.
     // Dominant chords are probably treated as major chords. The dominant seventh overrides the major seventh specified here.
     var majorScale                  = {"1":  0, "2":  0, "3":  0, "4":  0, "5":  0, "6":  0, "7":  0};
@@ -883,7 +888,7 @@ function getScaleForChord(chord) {
         chordMap[8] = scaleToUse[8];
     }
 
-    console.log("Scale for chord " + chord + ": " + JSON.stringify(chordMap))
+    // console.log("Scale for chord " + chord + ": " + JSON.stringify(chordMap))
     
     var midiNotes = render(chordMap, chordSpec);
     addBass(chordSpec, midiNotes);
@@ -893,9 +898,14 @@ function getScaleForChord(chord) {
 /**
  * Snaps a note to the nearest scale tone.
  * @param {*} note a MuseScore note object.
- * @param {*} scale an array of integers, where each integer is a MIDI pitch.
+ * @param {*} scaleTones an array of integers, where each integer is a MIDI pitch.
  */
 function snapNoteToNearestScaleTone(note, scaleTones) {
+
+    // If the scaleTones array is empty, then do nothing.
+    if (scaleTones.length === 0) {
+        return;
+    }
 
     // Calculate the intervals between the note to be shifted and each of the scale tones.
     // For each scale tone, an ascending interval (e.g. 11) and a descending interval (e.g. -1) will be calculated.
@@ -930,4 +940,32 @@ function snapNoteToNearestScaleTone(note, scaleTones) {
     note.tpc1 = pitchToTpc(note.pitch);
     note.tpc2 = pitchToTpc(note.pitch);
 
+}
+
+function isSegmentOnStrongBeat(segment) {
+
+    // Get the Measure object which contains this segment.
+    var measure = segment.parent;
+
+    
+    // Read the time signature at this segment.
+    var timeSignatureNumerator = measure.timesigActual.numerator;
+    var timeSignatureDenominator = measure.timesigActual.denominator;
+    
+    // Determine the starting tick of this segment's measure.
+    var start = measure.firstSegment.tick;
+
+    // Determine the tick of this segment.
+    var now = segment.tick;
+
+    // Determine the duration of a beat in ticks.
+    var wholeNoteDurationInTicks = 1920;
+    var beatDuration = wholeNoteDurationInTicks / timeSignatureDenominator;
+
+    // Determine how many ticks have elapsed since the start of the measure.
+    var delta = now - start;
+
+    // If the number of ticks elapsed is a multiple of the beat duration, then this segment is on a strong beat.
+    console.log("Start: " + start + ", now: " + now + ", delta: " + delta + ", beatDuration: " + beatDuration);
+    return (delta % beatDuration) === 0;
 }

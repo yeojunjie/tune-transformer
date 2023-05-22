@@ -41,3 +41,13 @@ do {
 I had to put all the code in one `.js` file because it seems that MuseScore allows imports in `.qml` files but not in `.js` files.
 
 Otherwise, I would have separated my code from the code I took from the ExpandChordSymbols plugin.
+
+## Time Signatures
+
+It appears that time signatures can only be read from a measure and not from a segment.
+```
+console.log(segment.parent.timesigActual.numerator);    // The actual numerator.
+console.log(segment.parent.timesigActual.denominator);  // The actual deminominator.
+console.log(segment.timesigActual.numerator);           // Always one.
+console.log(segment.timesigActual.denominator);         // Always zero.
+```

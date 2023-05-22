@@ -35,6 +35,8 @@ MuseScore {
         // For each segment in the score, ...
         while (segment !== null) {
 
+            const isSegmentOnStrongBeat = TuneTransformer.isSegmentOnStrongBeat(segment);
+
             // Check if this segment contains a chord symbol.
             var annotations = segment.annotations;
             for (var annotationIndex in annotations) {
@@ -69,14 +71,15 @@ MuseScore {
                     var numNotesInChord = notesInChord.length;
                     for (var i = 0; i < numNotesInChord; i++) {
                         
-                        // Determine what scale best suits the current chord symbol.
-                        // `scaleTones` is an array of integers. Each integer is a MIDI pitch number.
-                        var scaleTones = TuneTransformer.getScaleForChord(mostRecentChordSymbol);
+                        if (isSegmentOnStrongBeat === true) {
+                            // If the segment is on a strong beat, then we want to snap the note to the nearest chord tone.
+                            TuneTransformer.snapNoteToNearestChordTone(notesInChord[i], mostRecentChordSymbol);
+                        } else {
+                            // Else, we want to snap the note to the nearest scale tone.
+                            var scaleTones = TuneTransformer.getScaleForChord(mostRecentChordSymbol);
+                            TuneTransformer.snapNoteToNearestScaleTone(notesInChord[i], scaleTones);
+                        }
 
-                        // Snap the current note to the nearest scale tone.
-                        TuneTransformer.snapNoteToNearestScaleTone(notesInChord[i], scaleTones);
-
-                        // TuneTransformer.snapNoteToNearestChordTone(notesInChord[i], mostRecentChordSymbol);
                     }
                 }
             }

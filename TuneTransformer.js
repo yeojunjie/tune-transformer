@@ -444,6 +444,7 @@ function expandChordSpec(chordSpec) {
         result[parseInt(a.number)] = a.sharp ? 1 : -1;
     }
 
+    // console.log("chordMap", JSON.stringify(result));
     return result;
 }
 
@@ -778,7 +779,7 @@ function snapNoteToNearestChordTone(note, chord) {
     if (chord === null) {
         return;
     }
-    
+
     // Determine the chord tones of the chord.
     // For example, for a C major chord, chordTones would be [60, 64, 67].
     var chordTones = chordTextToMidiNotes(chord, true);
@@ -816,4 +817,155 @@ function snapNoteToNearestChordTone(note, chord) {
     note.tpc1 = pitchToTpc(note.pitch);
     note.tpc2 = pitchToTpc(note.pitch);
 
+}
+
+/**
+ * 
+ * @param {*} chord a string, e.g. "CM7" describing the chord.
+ * @returns an array of MIDI pitches representing a scale that fits the given chord.
+ */
+function getScaleForChord(chord) {
+
+    // Return an empty array if chord is null.
+    if (chord === null) {
+        return [];
+    }
+
+    // The major scale is played over major chords.
+    // Dominant chords are probably treated as major chords. The dominant seventh overrides the major seventh specified here.
+    var majorScale                  = {"1":  0, "2":  0, "3":  0, "4":  0, "5":  0, "6":  0, "7":  0};
+
+    // The harmonic minor scale is played over minor chords.
+    var harmonicMinorScale          = {"1":  0, "2":  0, "3": -1, "4":  0, "5":  0, "6": -1, "7": -1};
+
+    // The whole-half diminished scale is played over diminished chords.
+    var wholeHalfDiminishedScale    = {"1":  0, "2":  0, "3": -1, "4":  0, "5": -1, "6": -1, "7": -2, "8": -1};
+
+    // The Locrian #2 scale is played over half-diminished chords.
+    var locrianSharp2Scale          = {"1":  0, "2":  0, "3": -1, "4":  0, "5": -1, "6": -1, "7": -1};
+    
+    // Whole-tone scale.
+    var wholeToneScale              = {"1":  0, "2":  0, "3":  0, "4": +1, "5": +1, "6": +1};
+
+    // I hijack the implementation of chordTextToMidiNotes() to get the scale.
+    var chordSpec = parseChordSymbol(chord);
+    var chordMap = expandChordSpec(chordSpec);
+
+    var scaleToUse = null;
+
+    // Determine which scale to use for this chord's type.
+    if (chordSpec.major) {
+        scaleToUse = majorScale; // e.g. for chords like "FM" or "FM9"
+    } else if (chordSpec.minor) {
+        scaleToUse = harmonicMinorScale;
+    } else if (chordSpec.diminished) {
+        scaleToUse = wholeHalfDiminishedScale;
+    } else if (chordSpec.halfDiminished) {
+        scaleToUse = locrianSharp2Scale;
+    } else if (chordSpec.augmented) {
+        scaleToUse = wholeToneScale;
+    } else {
+        // Note that dominant chords are caught here.
+        // Note that chord symbols like "F" are caught here because they are not explicitly marked "major".
+        scaleToUse = majorScale;
+    }
+
+    // For each scale degree from 1 to 7, check if the note is already specified in the chord. If not, add it.
+    // For example, for the chord "C7b9", the scale degrees 1, 2, 3, 5, and 7 are already specified in the chord.
+    // We need to add scale degrees 4 and 6.
+    for (var scaleDegree = 1; scaleDegree <= 7; scaleDegree++) {
+        // We add 7 here because, for example, the second scale degree can be defined by
+        // Csus2 or C7b9. The 9 is the same as the 2, but we need to check for both.
+        if (chordMap[scaleDegree] === undefined && chordMap[scaleDegree + 7] === undefined) {
+            if (scaleToUse[scaleDegree] !== undefined) { // This is a special check for the whole tone scale which has no seventh scale degree.
+                chordMap[scaleDegree] = scaleToUse[scaleDegree];
+            }
+        }
+    }
+
+    // This is a special case for the whole tone scale which has an 'eighth' scale degree.
+    if (scaleToUse[8] !== undefined) {
+        chordMap[8] = scaleToUse[8];
+    }
+
+    // console.log("Scale for chord " + chord + ": " + JSON.stringify(chordMap))
+    
+    var midiNotes = render(chordMap, chordSpec);
+    addBass(chordSpec, midiNotes);
+    return midiNotes;
+}
+
+/**
+ * Snaps a note to the nearest scale tone.
+ * @param {*} note a MuseScore note object.
+ * @param {*} scaleTones an array of integers, where each integer is a MIDI pitch.
+ */
+function snapNoteToNearestScaleTone(note, scaleTones) {
+
+    // If the scaleTones array is empty, then do nothing.
+    if (scaleTones.length === 0) {
+        return;
+    }
+
+    // Calculate the intervals between the note to be shifted and each of the scale tones.
+    // For each scale tone, an ascending interval (e.g. 11) and a descending interval (e.g. -1) will be calculated.
+    // Later, we will be choosing the interval with the smallest absolute value. Shifting the note by that smallest interval.
+    // For example, to fit a note of pitch C# to a C major scale, we would calculate the following intervals:
+    // 1.  C# to C (ascending interval) = 11
+    // 2.  C# to C (descending interval) = -1
+    // 3.  C# to D (ascending interval) = 1
+    // ...
+    // 14. C# to B (descending interval) = -2
+    var intervals = [];
+    for (var i = 0; i < scaleTones.length; i++) {
+        
+        // Ascending intervals.
+        intervals[i * 2] = scaleTones[i] - note.pitch + 1200; // Add 1200 to avoid negative numbers.
+        intervals[i * 2] = intervals[i * 2] % 12; // Reduce compound intervals to simple intervals.
+
+        // Descending intervals.
+        intervals[(i * 2) + 1] = intervals[i * 2] - 12;
+    }
+
+    // Determine the best (smallest magnitude) interval to shift the note by.
+    var smallestInterval = intervals[0];
+    for (var i = 1; i < intervals.length; i++) {
+        if (Math.abs(intervals[i]) < Math.abs(smallestInterval)) {
+            smallestInterval = intervals[i];
+        }
+    }
+
+    // Alter the pitch of the note.
+    note.pitch += smallestInterval;
+    note.tpc1 = pitchToTpc(note.pitch);
+    note.tpc2 = pitchToTpc(note.pitch);
+
+}
+
+function isSegmentOnStrongBeat(segment) {
+
+    // Get the Measure object which contains this segment.
+    var measure = segment.parent;
+
+    
+    // Read the time signature at this segment.
+    var timeSignatureNumerator = measure.timesigActual.numerator;
+    var timeSignatureDenominator = measure.timesigActual.denominator;
+    
+    // Determine the starting tick of this segment's measure.
+    var start = measure.firstSegment.tick;
+
+    // Determine the tick of this segment.
+    var now = segment.tick;
+
+    // Determine the duration of a beat in ticks.
+    var wholeNoteDurationInTicks = 1920;
+    var beatDuration = wholeNoteDurationInTicks / timeSignatureDenominator;
+
+    // Determine how many ticks have elapsed since the start of the measure.
+    var delta = now - start;
+
+    // If the number of ticks elapsed is a multiple of the beat duration, then this segment is on a strong beat.
+    console.log("Start: " + start + ", now: " + now + ", delta: " + delta + ", beatDuration: " + beatDuration);
+    return (delta % beatDuration) === 0;
 }

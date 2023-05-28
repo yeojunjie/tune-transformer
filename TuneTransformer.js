@@ -835,8 +835,8 @@ function getScaleForChord(chord) {
     // Dominant chords are probably treated as major chords. The dominant seventh overrides the major seventh specified here.
     var majorScale                  = {"1":  0, "2":  0, "3":  0, "4":  0, "5":  0, "6":  0, "7":  0};
 
-    // The harmonic minor scale is played over minor chords.
-    var harmonicMinorScale          = {"1":  0, "2":  0, "3": -1, "4":  0, "5":  0, "6": -1, "7": -1};
+    // The natural minor scale is played over minor chords.
+    var naturalMinorScale           = {"1":  0, "2":  0, "3": -1, "4":  0, "5":  0, "6": -1, "7": -1};
 
     // The whole-half diminished scale is played over diminished chords.
     var wholeHalfDiminishedScale    = {"1":  0, "2":  0, "3": -1, "4":  0, "5": -1, "6": -1, "7": -2, "8": -1};
@@ -857,7 +857,7 @@ function getScaleForChord(chord) {
     if (chordSpec.major) {
         scaleToUse = majorScale; // e.g. for chords like "FM" or "FM9"
     } else if (chordSpec.minor) {
-        scaleToUse = harmonicMinorScale;
+        scaleToUse = naturalMinorScale;
     } else if (chordSpec.diminished) {
         scaleToUse = wholeHalfDiminishedScale;
     } else if (chordSpec.halfDiminished) {

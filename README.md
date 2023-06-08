@@ -1,8 +1,8 @@
-# tune-transformer
-TuneTransformer is a MuseScore 3.x plugin that shifts the notes of a melody to fit given chords.
+# Tune Transformer
+TuneTransformer is a MuseScore 3.x plugin that shifts the notes of a melody to fit given chords. **Watch the overview video [here](https://youtu.be/4x0sDSQc2CM).**
 
 ## Installation
-Place `tune-transformer.qml` and `TuneTransformer.js` in the folder for plugins.
+Click on the green **`<> Code`** button and select **Download ZIP**. Place `tune-transformer.qml` and `TuneTransformer.js` in the folder for plugins.
 General instructions for installing and using plugins can be found [here](https://musescore.org/en/handbook/3/plugins).
 
 ## Usage
@@ -13,16 +13,19 @@ General instructions for installing and using plugins can be found [here](https:
 
 To protect a section of the melody from being shifted, add a chord symbol with the text `N.C.` (no chord) above the first note of the section. This plugin has no effect on notes that do not have a most recent chord symbol. For this reason, the plugin resumes shifting notes at the next chord symbol after the `N.C.` chord symbol.
 
-For now, this plugin assumes that each chord symbol alters each note only once. For example, `C7b9#9` is not supported, and will be interpreted as `C7#9`.
-
 ## Credits
 
 This plugin relies heavily on the [ExpandChordSymbols](https://github.com/markshepherd/ExpandChordSymbols) plugin's calculation of which notes belong in a given chord.
 
+# Known Issues
+1. The plugin does not work properly for transposing instruments.
+2. The plugin does a poor job of spelling notes. Currently, it always spells the note between F and G as F#, even in the context of an Eb minor chord.
+3. The plugin does not support chords with multiple alterations to a single note. For example, `C7b9#9` is not supported, and will be interpreted as `C7#9`.
+
 # Developer Notes
 
 ## Cursors vs. Segments
-Instead of cursors, segments are used as the main way to navigate throughout the score. This is because, for some reason, in the code below which uses cursors, `Line A` causes all but the first segment to be skipped.
+This plugin uses segments to navigate throughout the score. Cursors are not used because, for some reason, in the code below which uses cursors, `Line A` causes all but the first segment to be skipped.
 
 ```
 // For each segment in the score, ...
@@ -36,6 +39,9 @@ do {
         for (var voice = 0; voice < numVoices; voice++) {
             console.log("Current voice: " + voice);
             cursor.setVoice(voice); // Line A
+
+            // For each chord, for each note, alter its pitch.
+
         }
             
     }
@@ -51,12 +57,12 @@ Otherwise, I would have separated my code from the code I took from the ExpandCh
 
 ## Time Signatures
 
-It appears that time signatures can only be read from a measure and not from a segment.
+Time signatures are read from the measure (parent of the segment) and not from the segment itself. This is because of the following behaviour:
 
 ```
 var measure = segment.parent;
-console.log(measure.timesigActual.numerator);    // The actual numerator.
-console.log(measure.timesigActual.denominator);  // The actual deminominator.
-console.log(segment.timesigActual.numerator);    // Always one.
-console.log(segment.timesigActual.denominator);  // Always zero.
+console.log(measure.timesigActual.numerator);    // Prints the actual numerator.
+console.log(measure.timesigActual.denominator);  // Prints the actual deminominator.
+console.log(segment.timesigActual.numerator);    // Always prints one.
+console.log(segment.timesigActual.denominator);  // Always prints zero.
 ```

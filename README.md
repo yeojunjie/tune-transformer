@@ -2,7 +2,7 @@
 TuneTransformer is a MuseScore 3.x plugin that shifts the notes of a melody to fit given chords. **Watch the overview video [here](https://youtu.be/4x0sDSQc2CM).**
 
 ## Installation
-Click on the green **`<> Code`** button and select **Download ZIP**. Place `tune-transformer.qml` and `TuneTransformer.js` in the folder for plugins.
+Click on the green **`<> Code`** button and select **Download ZIP**. Place `tune-transformer.qml` and `TuneTransformer.js` in the folder that MuseScore has been configured to look for plugins in.
 General instructions for installing and using plugins can be found [here](https://musescore.org/en/handbook/3/plugins).
 
 ## Usage

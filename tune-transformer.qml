@@ -17,7 +17,7 @@ import "TuneTransformer.js" as TuneTransformer
 MuseScore {
     version: "3.4.2.1"
     description: qsTr("This is a plugin that shifts the notes of a melody to fit given chords.")
-    menuPath: "Plugins.Notes." + qsTr("Tune Transformer")
+    menuPath: "Plugins." + qsTr("Tune Transformer")
 
     onRun: {
 

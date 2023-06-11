@@ -965,7 +965,6 @@ function isSegmentOnStrongBeat(segment) {
     var delta = now - start;
 
     // If the number of ticks elapsed is a multiple of the beat duration, then this segment is on a strong beat.
-    console.log("Start: " + start + ", now: " + now + ", delta: " + delta + ", beatDuration: " + beatDuration);
     return (delta % beatDuration) === 0;
 }
 
@@ -977,6 +976,7 @@ function isSegmentOnStrongBeat(segment) {
  */
 function isNoteTheLastNoteInTieChain(note) {
     // If this note has backward tie and has no forward tie, then it is the last note in a tie chain.
+    return note.tieBack && !note.tieForward; // Note that we evaluate the truthiness to determine whether the tie exists.
 }
 
 /**
@@ -984,5 +984,13 @@ function isNoteTheLastNoteInTieChain(note) {
  * @param {*} note A MuseScore Note object.
  */
 function repitchEarlierNotesInTieChain(note) {
-    // While this note has a backward tie, repitch the previous note in the tie chain to match the pitch of this note.
+    var currentNote = note;
+    // While the current note has a backward tie,
+    while (currentNote.tieBack) {
+        // repitch the previous note in the tie chain to match the pitch of this note.
+        currentNote = currentNote.tieBack.startNote;
+        currentNote.pitch = note.pitch;
+        currentNote.tpc1 = pitchToTpc(note.pitch);
+        currentNote.tpc2 = pitchToTpc(note.pitch);
+    }
 }

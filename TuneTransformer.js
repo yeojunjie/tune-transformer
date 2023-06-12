@@ -763,8 +763,26 @@ function expandChordSymbols(pattern, options) {
 // ================================================================================================
 
 function pitchToTpc(pitch) {
-    // For some reason, I cannot define the array as a global variable.
-    return [14, 21, 16, 11, 18, 13, 20, 15, 10, 17, 12, 19][pitch % 12];
+
+    // There are only two ways to spell the note between G and A.
+    // We duplicate the G# spelling for convenience.
+
+    var tpcPerPitch = [
+        [ 26, 14,  2 ], // B# , C , Dbb    0
+        [ 33, 21,  9 ], // B##, C#, Db     1
+        [ 28, 16,  4 ], // C##, D , Ebb    2
+        [ 23, 11, -1 ], // D# , Eb, Fbb    3
+        [ 30, 18,  6 ], // D##, E , Fb     4
+        [ 25, 13,  1 ], // E# , F , Gbb    5
+        [ 32, 20,  8 ], // E##, F#, Gb     6
+        [ 27, 15,  3 ], // F##, G , Abb    7
+        [ 22, 22, 10 ], // G#,  G#, Ab     8
+        [ 29, 17,  5 ], // G##, A , Bbb    9
+        [ 24, 12,  0 ], // A# , Bb, Cbb    10
+        [ 31, 19,  7 ]  // A##, B , Cb     11
+    ];
+
+    return tpcPerPitch[pitch % 12][1];
 }
 
 /**
@@ -813,10 +831,9 @@ function snapNoteToNearestChordTone(note, chord) {
     }
 
     // Alter the pitch of the note.
-    note.pitch += smallestInterval;
-    note.tpc1 = pitchToTpc(note.pitch);
-    note.tpc2 = pitchToTpc(note.pitch);
-
+    // Alter the pitch of the note.
+    var newPitch = note.pitch + smallestInterval;
+    alterPitchOfNote(note, newPitch);
 }
 
 /**
@@ -936,10 +953,21 @@ function snapNoteToNearestScaleTone(note, scaleTones) {
     }
 
     // Alter the pitch of the note.
-    note.pitch += smallestInterval;
+    var newPitch = note.pitch + smallestInterval;
+    alterPitchOfNote(note, newPitch);
+}
+
+/**
+ * Alters the pitch of the given note to the given pitch.
+ * The original note's tpc1 and tpc2 is used to determine whether the note is played by a transposing instrument.
+ * This transposition information is used in calculating the new tpc1 and tpc2 values.
+ * @param {*} note The MuseScore note object to be altered.
+ * @param {*} newPitch The MIDI pitch to which the note should be altered.
+ */
+function alterPitchOfNote(note, newPitch) {
+    note.pitch = newPitch;
     note.tpc1 = pitchToTpc(note.pitch);
     note.tpc2 = pitchToTpc(note.pitch);
-
 }
 
 function isSegmentOnStrongBeat(segment) {

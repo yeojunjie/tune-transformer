@@ -965,9 +965,11 @@ function snapNoteToNearestScaleTone(note, scaleTones) {
  * @param {*} newPitch The MIDI pitch to which the note should be altered.
  */
 function alterPitchOfNote(note, newPitch) {
+    var tpcDifference = note.tpc2 - note.tpc1;
+
     note.pitch = newPitch;
     note.tpc1 = pitchToTpc(note.pitch);
-    note.tpc2 = pitchToTpc(note.pitch);
+    note.tpc2 = note.tpc1 + tpcDifference;
 }
 
 function isSegmentOnStrongBeat(segment) {

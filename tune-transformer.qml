@@ -80,6 +80,12 @@ MuseScore {
                             TuneTransformer.snapNoteToNearestScaleTone(notesInChord[i], scaleTones);
                         }
 
+                        // If the current note is the last note of a chain of tied notes, shift all the other notes, i.e. the earlier notes, in the
+                        // chain of tied notes to the same pitch as the current note.
+                        if (TuneTransformer.isNoteTheLastNoteInTieChain(notesInChord[i])) {
+                            TuneTransformer.repitchEarlierNotesInTieChain(notesInChord[i]);
+                        }
+
                     }
                 }
             }

@@ -946,7 +946,6 @@ function isSegmentOnStrongBeat(segment) {
 
     // Get the Measure object which contains this segment.
     var measure = segment.parent;
-
     
     // Read the time signature at this segment.
     var timeSignatureNumerator = measure.timesigActual.numerator;
@@ -966,6 +965,32 @@ function isSegmentOnStrongBeat(segment) {
     var delta = now - start;
 
     // If the number of ticks elapsed is a multiple of the beat duration, then this segment is on a strong beat.
-    console.log("Start: " + start + ", now: " + now + ", delta: " + delta + ", beatDuration: " + beatDuration);
     return (delta % beatDuration) === 0;
+}
+
+/**
+ * Returns true if the given note is the last note in a tie chain. Returns false otherwise, or if the note is not tied.
+ * Used to ensure that a chain of tied notes which span multiple chord symbols are not snapped to different pitches,
+ * since the notes in a tie chain should be of the same pitch.
+ * @param {*} note A MuseScore Note object.
+ */
+function isNoteTheLastNoteInTieChain(note) {
+    // If this note has backward tie and has no forward tie, then it is the last note in a tie chain.
+    return note.tieBack && !note.tieForward; // Note that we evaluate the truthiness to determine whether the tie exists.
+}
+
+/**
+ * Takes a tied note and repitches all earlier notes in the tie chain to match the pitch of the given note.
+ * @param {*} note A MuseScore Note object.
+ */
+function repitchEarlierNotesInTieChain(note) {
+    var currentNote = note;
+    // While the current note has a backward tie,
+    while (currentNote.tieBack) {
+        // repitch the previous note in the tie chain to match the pitch of the final note in the tie chain.
+        currentNote = currentNote.tieBack.startNote;
+        currentNote.pitch = note.pitch;
+        currentNote.tpc1 = note.tpc1;
+        currentNote.tpc2 = note.tpc2;
+    }
 }

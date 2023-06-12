@@ -987,10 +987,10 @@ function repitchEarlierNotesInTieChain(note) {
     var currentNote = note;
     // While the current note has a backward tie,
     while (currentNote.tieBack) {
-        // repitch the previous note in the tie chain to match the pitch of this note.
+        // repitch the previous note in the tie chain to match the pitch of the final note in the tie chain.
         currentNote = currentNote.tieBack.startNote;
         currentNote.pitch = note.pitch;
-        currentNote.tpc1 = pitchToTpc(note.pitch);
-        currentNote.tpc2 = pitchToTpc(note.pitch);
+        currentNote.tpc1 = note.tpc1;
+        currentNote.tpc2 = note.tpc2;
     }
 }

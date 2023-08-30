@@ -18,10 +18,8 @@ To protect a section of the melody from being shifted, add a chord symbol with t
 This plugin relies heavily on the [ExpandChordSymbols](https://github.com/markshepherd/ExpandChordSymbols) plugin's calculation of which notes belong in a given chord.
 
 # Known Issues
-1. The plugin does not work properly for transposing instruments.
-2. The plugin does a poor job of spelling notes. Currently, it always spells the note between F and G as F#, even in the context of an Eb minor chord.
-3. The plugin does not support chords with multiple alterations to a single note. For example, `C7b9#9` is not supported, and will be interpreted as `C7#9`.
-4. The plugin does not work correctly with tied notes.
+1. The plugin does a poor job of spelling notes. Currently, it always spells the note between F and G as F#, even in the context of an Eb minor chord.
+2. The plugin does not support chords with multiple alterations to a single note. For example, `C7b9#9` is not supported, and will be interpreted as `C7#9`.
 
 # Developer Notes
 
